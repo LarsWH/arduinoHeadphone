@@ -1,30 +1,28 @@
-
-
-//#include <Arduino.h>
-
-#define MY_LED 9
-#define MY_RELAY1 7
-#define MY_RELAY2 8
-#define MY_IN A0
+#define MY_LED 9 //LED_BUILTIN
+#define MY_RELAY 2
+#define MY_IN A7
 #define SAMPLE_DELAY 1000
 #define SETTLE_DELAY 10
 
+//#define SERIAL_LOG
+
 void setup() {
+  #ifdef SERIAL_LOG
   Serial.begin(115200);
   Serial.println("-------- Hello ---------");
+  #endif
   pinMode(MY_LED, OUTPUT);
-  pinMode(MY_RELAY1, OUTPUT);
-  pinMode(MY_RELAY2, OUTPUT);
+  pinMode(MY_RELAY, OUTPUT);
   digitalWrite(MY_LED, HIGH);
 }
 
 void loop() {
 
-  bool empty = lightDetected();
-  if (empty) {
-    relayOn(false);
-  } else {
+  bool emptyHanger = lightDetected();
+  if (emptyHanger) {
     relayOn(true);
+  } else {
+    relayOn(false);
   }
   delay(SAMPLE_DELAY);
 
@@ -34,27 +32,33 @@ bool lightDetected() {
   digitalWrite(MY_LED, HIGH);
   delay(SETTLE_DELAY);
   int a = analogRead(MY_IN); 
+  #ifdef SERIAL_LOG
   Serial.print(a);
+  #endif
   digitalWrite(MY_LED, LOW);
   if (a > 200) {
+    #ifdef SERIAL_LOG
     Serial.println("-------- HP removed ---------");
+    #endif
     return true;
   }
+  #ifdef SERIAL_LOG
   Serial.println("-------- HP present ---------");
+  #endif
   return false;
 }
 
 void relayOn(bool on) {
   if (on) {
+    #ifdef SERIAL_LOG
     Serial.println("-------- Speakers ---------");
-    digitalWrite(MY_RELAY1, HIGH);
-    delay(SETTLE_DELAY*5);
-    digitalWrite(MY_RELAY2, HIGH);
+    #endif
+    digitalWrite(MY_RELAY, HIGH);
   } else {
+    #ifdef SERIAL_LOG
     Serial.println("-------- Headphones ---------");
-    digitalWrite(MY_RELAY1, LOW);
-    delay(SETTLE_DELAY*5);
-    digitalWrite(MY_RELAY2, LOW);
+    #endif
+    digitalWrite(MY_RELAY, LOW);
   }
 }
 

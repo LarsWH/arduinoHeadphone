@@ -1,65 +1,47 @@
-#define MY_LED 9 //LED_BUILTIN
-#define MY_RELAY 2
-#define MY_IN A7
+// Pin definitions
+#define IR_TRANSMITTER 9
+#define IR_RECEIVER_ANALOG A7
+#define AUDIO_RELAY 2
+
+// Control
 #define SAMPLE_DELAY 1000
 #define SETTLE_DELAY 10
-
-//#define SERIAL_LOG
+#define ANALOG_VALUE_LIMIT 200
 
 void setup() {
-  #ifdef SERIAL_LOG
-  Serial.begin(115200);
-  Serial.println("-------- Hello ---------");
-  #endif
-  pinMode(MY_LED, OUTPUT);
-  pinMode(MY_RELAY, OUTPUT);
-  digitalWrite(MY_LED, HIGH);
+  pinMode(IR_TRANSMITTER, OUTPUT);
+  pinMode(AUDIO_RELAY, OUTPUT);
+  digitalWrite(IR_TRANSMITTER, HIGH);
 }
 
 void loop() {
-
   bool emptyHanger = lightDetected();
   if (emptyHanger) {
-    relayOn(true);
+    audioInHeadset(true);
   } else {
-    relayOn(false);
+    audioInHeadset(false);
   }
   delay(SAMPLE_DELAY);
-
 }
 
+
 bool lightDetected() {
-  digitalWrite(MY_LED, HIGH);
+  digitalWrite(IR_TRANSMITTER, HIGH);
   delay(SETTLE_DELAY);
-  int a = analogRead(MY_IN); 
-  #ifdef SERIAL_LOG
-  Serial.print(a);
-  #endif
-  digitalWrite(MY_LED, LOW);
-  if (a > 200) {
-    #ifdef SERIAL_LOG
-    Serial.println("-------- HP removed ---------");
-    #endif
+  int a = analogRead(IR_RECEIVER_ANALOG); 
+  digitalWrite(IR_TRANSMITTER, LOW);
+  if (a > ANALOG_VALUE_LIMIT) {
     return true;
   }
-  #ifdef SERIAL_LOG
-  Serial.println("-------- HP present ---------");
-  #endif
   return false;
 }
 
-void relayOn(bool on) {
+
+void audioInHeadset(bool on) {
   if (on) {
-    #ifdef SERIAL_LOG
-    Serial.println("-------- Speakers ---------");
-    #endif
-    digitalWrite(MY_RELAY, HIGH);
+    digitalWrite(AUDIO_RELAY, HIGH);
   } else {
-    #ifdef SERIAL_LOG
-    Serial.println("-------- Headphones ---------");
-    #endif
-    digitalWrite(MY_RELAY, LOW);
+    digitalWrite(AUDIO_RELAY, LOW);
   }
 }
-
 
